@@ -1,0 +1,128 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+    overflow: hidden;
+}
+
+#pdf-container {
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 0; /* Remove padding here, move it to content-wrapper */
+    border-radius: 8px;
+    text-align: center;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px; /* Minimum size for usability */
+    min-height: 200px;
+    cursor: grab;
+}
+
+/* The content wrapper holds everything except the resizable handles */
+#content-wrapper {
+    padding: 20px;
+    overflow: auto; /* Allows content scroll if canvas is larger than container */
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#pdf-container:active {
+    cursor: grabbing;
+}
+
+/* --- RESIZER STYLES --- */
+.resizer {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: transparent; /* Invisible handles */
+    z-index: 10;
+}
+
+/* Corner Handles */
+.resizer.corner {
+    width: 20px;
+    height: 20px;
+}
+.resizer.top-left {
+    top: -10px;
+    left: -10px;
+    cursor: nwse-resize;
+}
+.resizer.top-right {
+    top: -10px;
+    right: -10px;
+    cursor: nesw-resize;
+}
+.resizer.bottom-left {
+    bottom: -10px;
+    left: -10px;
+    cursor: nesw-resize;
+}
+.resizer.bottom-right {
+    bottom: -10px;
+    right: -10px;
+    cursor: nwse-resize;
+}
+
+/* Edge Handles */
+.resizer.edge {
+    width: 100%;
+    height: 100%;
+}
+.resizer.top {
+    top: -5px;
+    left: 0;
+    height: 10px;
+    cursor: ns-resize;
+}
+.resizer.bottom {
+    bottom: -5px;
+    left: 0;
+    height: 10px;
+    cursor: ns-resize;
+}
+.resizer.left {
+    left: -5px;
+    top: 0;
+    width: 10px;
+    cursor: ew-resize;
+    height: 100%;
+}
+.resizer.right {
+    right: -5px;
+    top: 0;
+    width: 10px;
+    cursor: ew-resize;
+    height: 100%;
+}
+
+/* --- EXISTING CONTENT STYLES --- */
+#controls {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #eee;
+    border-radius: 4px;
+}
+
+#page-info-status {
+    margin-bottom: 10px;
+}
+
+#navigation-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#pdf-render {
+    border: 1px solid #ccc;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
