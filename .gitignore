@@ -1,3 +1,9 @@
 playground/
 .vscode/
 Apps/TestApp/
+node_modules/
+*.bat
+Playground/
+output/
+temp/
+uploads/

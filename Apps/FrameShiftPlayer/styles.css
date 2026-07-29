@@ -1,0 +1,863 @@
+body {
+    background: #134e4a;
+}
+
+#frameShiftPlayer {
+    position: fixed;
+    top: 80px;
+    left: 120px;
+    width: 640px;
+    height: 420px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    z-index: 999999;
+    overflow: hidden;
+    outline: none;
+    border: 2px solid #464545;
+}
+
+/* Title Bar */
+#frameShiftPlayer .title-bar {
+    height: 40px;
+    background: #2d2d2d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-size: 14px;
+    user-select: none;
+}
+
+#frameShiftPlayer .title-bar .options-menu {
+    background-color: #3f3e3e;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#frameShiftPlayer .title-bar .title-btn {
+    display: inline-block;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* Video Area */
+#frameShiftPlayer .player-content {
+    flex: 1;
+    position: relative;
+    background: #050523;
+    overflow: hidden;
+}
+
+#frameShiftPlayer .player-content video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Drop Zone */
+#frameShiftPlayer .player-content .dropZone {
+    position: absolute;
+    color: transparent;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#frameShiftPlayer .options-menu > button {
+    background: transparent;
+    padding: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+#frameShiftPlayer .options-menu #showClipInfoBtn,
+#frameShiftPlayer .options-menu #moreOptionBtn {
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    color: #ddd;
+    font-weight: 600;
+}
+
+#frameShiftPlayer .options-menu .more-tools {
+    position: relative;
+}
+
+#frameShiftPlayer .options-menu .more-menu-div {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: -60px;
+    background-color: rgb(29 38 32);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    padding: 5px;
+    border: 2px solid rgb(154 155 153);
+    border-radius: 5px;
+    z-index: 20000;
+}
+
+#frameShiftPlayer .options-menu .more-menu-div button {
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 15px;
+    padding: 5px 10px;
+    border: none;
+    outline: none;
+}
+
+#frameShiftPlayer .options-menu .more-menu-div input {
+    width: 35px;
+    border-radius: 3px;
+    font-size: 15px;
+    padding: 5px;
+    border: none;
+    outline: none;
+}
+
+#frameShiftPlayer .options-menu .more-menu-div button:hover {
+    color: white;
+    background-color: blue;
+}
+
+#frameShiftPlayer .options-menu .more-tools:hover .more-menu-div {
+    display: grid;
+}
+
+#frameShiftPlayer .options-menu > button:hover {
+    background: #6d6c6c;
+}
+
+#frameShiftPlayer .options-menu .clip-info {
+    position: relative;
+}
+
+#frameShiftPlayer .options-menu .clip-info-div {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: -150px;
+    background-color: rgb(75 63 62);
+    padding: 5px 10px;
+    border: 2px solid rgb(240, 241, 239);
+    border-radius: 5px;
+    z-index: 20000;
+    font-size: 18px;
+
+    width: max-content;
+}
+
+#frameShiftPlayer .options-menu .clip-info:hover .clip-info-div {
+    display: block;
+}
+
+/* Controls */
+#frameShiftPlayer .controls {
+    height: 35px;
+    background: #2d2d2d;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    gap: 5px;
+    box-sizing: content-box;
+    position: relative;
+}
+
+#frameShiftPlayer .controls button {
+    background: #444;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#frameShiftPlayer .controls button:hover {
+    background: #666;
+}
+
+#frameShiftPlayer .controls input[type="range"] {
+    flex: 1;
+}
+
+#frameShiftPlayer .controls #elapsedTime,
+#frameShiftPlayer .controls #timeDisplay {
+    font-size: 15px;
+    color: #ccc;
+}
+
+#hoverTime {
+    position: absolute;
+    bottom: 30px;
+    background: blue;
+    color: white;
+    padding: 2px 6px;
+    font-size: 15px;
+    border-radius: 4px;
+    display: none;
+    pointer-events: none;
+}
+/**TODO:---------------Bookmark windows--------------*/
+#bookmarkWindow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    min-width: 420px;
+    min-height: 320px;
+    max-height: 95vh;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    color: #ddd;
+    font-family:
+        Segoe UI,
+        Arial,
+        sans-serif;
+    display: flex;
+    flex-direction: column;
+    z-index: 999999;
+}
+
+#bookmarkWindow .title-bar {
+    background: linear-gradient(#333, #222);
+    padding: 6px 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#bookmarkWindow .title-bar button {
+    background: transparent;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+#bookmarkWindow .title {
+    font-size: 18px;
+    color: chocolate;
+}
+
+.bookmark-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.bookmark-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bookmark-content:hover::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+}
+
+/* .bookmark-content::-webkit-scrollbar-thumb {
+    background: transparent;
+} */
+
+#bookmarkTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+#bookmarkTable thead {
+    background: #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#bookmarkTable th {
+    padding: 6px;
+    border-bottom: 1px solid #444;
+    text-align: left;
+}
+
+#bookmarkTable td {
+    padding: 6px;
+    border-bottom: 1px solid #333;
+}
+
+#bookmarkTable .timestamp-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#bookmarkTable .timestamp-cell .modifyTimestamp {
+    cursor: pointer;
+    background: none;
+    color: #9638f5;
+    border: none;
+    outline: none;
+}
+
+#bookmarkTable tbody tr:hover {
+    background: #2f2f2f;
+}
+
+#bookmarkTable tbody tr.selected {
+    background: #2c3e50;
+}
+
+.timestamp {
+    color: #4fc3f7;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    width: 75px;
+}
+
+.timestamp:hover {
+    color: #8381fa;
+    text-decoration: underline;
+}
+
+#bookmarkTable td[contenteditable="true"] {
+    outline: none;
+    cursor: text;
+    background: inherit;
+}
+
+#bookmarkTable td[contenteditable="true"]:focus {
+    background: #3a3a3a;
+    border-radius: 3px;
+    outline: 1px solid #4da3ff;
+}
+
+.bookmark-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 6px;
+    border-top: 1px solid #444;
+    background: #222;
+}
+
+.bookmark-controls button {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    color: #ddd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.bookmark-controls button:hover {
+    background: #4a4a4a;
+}
+.deleteBookmark {
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.deleteBookmark:hover {
+    opacity: 1;
+}
+
+/**player notification*/
+#playerHUD {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    background: white;
+    border: 3px solid rgb(160, 3, 207);
+    color: black;
+
+    padding: 5px;
+    border-radius: 3px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    pointer-events: none;
+
+    opacity: 0;
+    transition:
+        opacity 0.1s ease,
+        transform 0.1s ease;
+    z-index: 9999;
+}
+
+#playerHUD.show {
+    opacity: 1;
+    /* transform: translateY(0); */
+}
+
+/**TODO-------- transcript feature----- */
+#frameShiftPlayer .player-content .subtitle {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    text-shadow: 0 0 5px black;
+}
+
+#frameShiftPlayer .transcript {
+    position: fixed;
+    overflow: hidden;
+    top: 80px;
+    left: 40%;
+    width: 700px;
+    height: 400px;
+    background: #fef1f8;
+    color: #fff;
+    display: none;
+    border-radius: 10px;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid #0280b7;
+}
+
+#frameShiftPlayer .transcript .title-bar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+    background: #0093d4;
+}
+
+#frameShiftPlayer .transcript .transcript-font button {
+    background: #fdd;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #613db4be;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+#frameShiftPlayer .transcript .transcript-content {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0 10px 10px 15px;
+    margin: 0 auto;
+    font-family: "Open sans", serif;
+    font-size: 18px;
+    background: #fef1f8;
+    color: black;
+}
+
+.transcript .transcript-content .active {
+    background: yellow;
+}
+
+/**TODO:-------- Splitting feature----- */
+
+.splitter-modal {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    min-width: 510px;
+
+    padding: 10px;
+    padding-top: 3px;
+
+    background: #222;
+    border: 1px solid #555;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+
+    z-index: 9999;
+
+    font-size: 15px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ---------- Title Bar ---------- */
+
+#frameShiftPlayer .splitter-modal .title-bar {
+    margin-bottom: 10px;
+
+    display: flex;
+    justify-content: space-between;
+
+    background: transparent;
+    padding: 0;
+}
+
+.splitter-modal .title-bar .title {
+    font-size: 18px;
+    color: #4da3ff;
+}
+
+.close-splitter-modal {
+    cursor: pointer;
+}
+
+.close-splitter-modal:hover {
+    color: #ff5555;
+}
+
+/* ---------- Rows ---------- */
+
+.splitter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 8px;
+}
+
+.splitter-toolbar {
+    justify-content: space-between;
+}
+
+.splitter-row:last-child {
+    justify-content: center;
+    margin-bottom: 0;
+}
+
+/* ---------- General Controls ---------- */
+.splitter-row button {
+    /* min-width: 55px; */
+    cursor: pointer;
+    padding: 5px;
+    background: transparent;
+    outline: none;
+    border: none;
+    color: #fdd;
+    font-size: 15px;
+}
+
+.splitter-row .output-label {
+    color: rgba(243, 159, 2, 0.973);
+}
+
+/* ---------- Select ---------- */
+
+#selectOutputFormat,
+#splitMode {
+    background: #333;
+    color: #fdd;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 3px 5px;
+}
+
+/* ---------- Footer Buttons ---------- */
+
+.splitter-row:last-child button {
+    background: #7f00ff;
+    color: #fff;
+
+    border-radius: 3px;
+}
+
+.splitter-row:last-child button:hover {
+    background: #6302c4;
+}
+
+#downloadBtn {
+    background: transparent;
+    border: 2px solid #7f00ff;
+}
+
+#downloadBtn:hover {
+    background: #6302c4;
+}
+
+/* ---------- Table ---------- */
+.table-row {
+    width: 100%;
+    flex-direction: column;
+}
+
+.clip-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #006a42;
+    border-radius: 5px;
+}
+
+#clipTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2b2b2b;
+    color: #fdd;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+#clipTable th:nth-child(1),
+#clipTable td:nth-child(1) {
+    width: 25px;
+}
+
+#clipTable th:nth-child(2),
+#clipTable td:nth-child(2) {
+    width: 20px;
+    font-size: 15px;
+}
+
+#clipTable th:nth-child(3),
+#clipTable td:nth-child(3),
+#clipTable th:nth-child(4),
+#clipTable td:nth-child(4),
+#clipTable th:nth-child(5),
+#clipTable td:nth-child(5),
+#clipTable th:nth-child(6),
+#clipTable td:nth-child(6) {
+    width: 95px;
+    font-size: 15px;
+}
+
+#clipTable th,
+#clipTable td {
+    border: 1px solid #555;
+    padding: 5px 6px;
+    text-align: center;
+}
+
+#clipTable th {
+    background: #333;
+    color: antiquewhite;
+    font-weight: bold;
+}
+
+#clipTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #19392d;
+    border: 1px solid #006a42;
+}
+
+/* ---------- Clickable Headers ---------- */
+
+#clipTable .clickable-header {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+#clipTable #toggleAllHeader {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+#clipTable .clickable-header:hover {
+    background: #00498d;
+    color: #fff;
+}
+
+#clipTable .clickable-header:active {
+    transform: scale(0.98);
+}
+
+/* ---------- Editable Cells ---------- */
+#clipTable td[contenteditable="true"] {
+    cursor: text;
+    text-align: center;
+    outline: none;
+}
+
+#clipTable td[contenteditable="true"]:focus {
+    background: #00498d;
+}
+
+/* ---------- Table Rows ---------- */
+
+#clipTableBody tr {
+    cursor: pointer;
+}
+
+#clipTableBody tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Selected Row ---------- */
+
+.selected-row {
+    background: rgba(145, 77, 255, 0.22);
+}
+
+.selected-row td {
+    border-top: 2px solid #4da3ff;
+    border-bottom: 2px solid #4da3ff;
+
+    color: #fff;
+}
+
+/* ---------- Empty Table ---------- */
+
+.empty-row td {
+    color: #999;
+    font-style: italic;
+}
+
+/* ---------- Action Buttons ---------- */
+
+.clip-actions {
+    white-space: nowrap;
+}
+
+.clip-actions button {
+    min-width: 22px;
+    padding: 1px 3px;
+    margin: 0 1px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    background: #333;
+    color: #fdd;
+    cursor: pointer;
+    user-select: none;
+}
+
+.clip-actions button:hover {
+    background: #00498d;
+}
+
+.clip-summary-wrapper {
+    margin-top: 6px;
+}
+
+#groupTable,
+#clipSummaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2a2a2a;
+    color: #ddd;
+}
+
+#groupTable th,
+#groupTable td,
+#clipSummaryTable th,
+#clipSummaryTable td {
+    border: 1px solid #444;
+    padding: 0 6px;
+    text-align: center;
+}
+
+#groupTable th,
+#clipSummaryTable th {
+    color: #4da3ff;
+    padding: 4px 6px;
+}
+
+#groupTable #groupTableBody tr .group-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#addGroupBtn {
+    margin-top: 8px;
+}
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ddd;
+    border-top: 2px solid #7f00ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------- Misc ---------- */
+
+.splitter-row [contenteditable] {
+    white-space: nowrap;
+}
+
+/* =====================================
+   Floating Preview Player
+===================================== */
+.preview-window {
+    position: fixed;
+    width: 600px;
+    height: 500px;
+    top: 120px;
+    left: 120px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 6px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    resize: none;
+}
+
+.preview-window.hidden {
+    display: none;
+}
+
+/* title bar */
+.preview-window .title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    padding: 3px 5px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.preview-window .title {
+    color: #4da3ff;
+    font-size: 16px;
+}
+
+.close-preview {
+    cursor: pointer;
+}
+
+/* video container */
+.preview-body {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+#split-player {
+    width: 97%;
+    height: 97%;
+    object-fit: contain;
+    border: 3px solid #00498d;
+    border-radius: 5px;
+    background: black;
+}

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FrameShift Player</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script defer src="../HelpfulFn.js"></script>
+        <script defer src="script.js"></script>
+    </head>
+    <body>
+        <div id="frameShiftPlayer">
+            <div class="title-bar">
+                <span class="title .title-btn">🎞️ FrameShift Player</span>
+                <div class="options-menu">
+                    <div class="clip-info">
+                        <button id="showClipInfoBtn">ℹ️</button>
+                        <div class="clip-info-div">
+                            <span>Clip Information</span>
+                        </div>
+                    </div>
+                    <button id="loadVideoBtn" title="Open video">📂</button>
+                    <button id="displayBookmarkWindomBtn" title="Show Bookmarks window">🏷️</button>
+                    <button id="mediaSplitter" title="Show Media Splitter">⚔️</button>
+                    <button id="toggleTranscript" title="Toggle Transcript">📝</button>
+                    <input type="file" id="subtitleInput" accept=".srt,.vtt,.json" hidden />
+                    <div class="more-tools">
+                        <button id="moreOptionBtn" title="More options">☰</button>
+                        <div class="more-menu-div">
+                            <button id="uploadSubtitleBtn">📜</button>
+                            <button id="toggleSubtitle" title="Toggle Subtitle">🇨🇨</button>
+                            <button id="placeFpLeftBtn" title="Place left">⬅️</button>
+                            <button id="placeFpRightBtn" title="Place Right">➡️</button>
+                            <input id="setForBackTime" type="number" placeholder="5s" min="0" title="Set Forward/Backward time" />
+                            <button id="stopBtn">⏹️</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span class="maxminFramePlayer title-btn" title="minimize">—</span>
+                    <span class="maxFramePlayer title-btn" title="Maximuze and Restore Screen">⿻</span>
+                    <span class="fullscreenFramePlayer title-btn" title="full screen">⛶</span>
+                    <span class="closeFramePlayer title-btn" title="Close">❌</span>
+                </div>
+            </div>
+
+            <div class="player-content" id="dropArea">
+                <div class="dropZone">Drag & Drop Video Here</div>
+                <video id="fsVideo"></video>
+                <div id="playerHUD"></div>
+                <!-- Subtitle overlay -->
+                <div id="subtitleOverlay" class="subtitle"></div>
+            </div>
+
+            <div class="controls">
+                <span id="elapsedTime">00:00</span>
+                <input type="range" id="progress" min="0" max="100" value="0" style="cursor: pointer" />
+                <div id="hoverTime"></div>
+                <span id="timeDisplay">00:00 / 00:00</span>
+                <input type="file" id="videoFileInput" accept=".mp4,.mkv,.mp3" style="display: none" />
+                <button id="fastBackward">⏪</button>
+                <button id="playBtn">▶</button>
+                <button id="fastForward">⏩</button>
+                <button id="addBookmarkBtn" title="Add bookmark">🔖</button>
+                <button id="captureBtn">📸</button>
+            </div>
+
+            <!-- Transcript Window -->
+            <div id="transcriptWindow" class="transcript">
+                <div class="title-bar">
+                    <span class="title">🎞️ Transcript Viewer</span>
+                    <div class="transcript-font">
+                        <button id="increase-transcript-font" title="increase text size">➕</button>
+                        <button id="decrease-transcript-font" title="decrease text size">➖</button>
+                    </div>
+                </div>
+                <div class="transcript-content"></div>
+            </div>
+
+            <!-- Media Splitter Window -->
+            <div id="splitterModal" class="splitter-modal hidden">
+                <div class="title-bar">
+                    <span class="title">✂️ Media Splitter</span>
+                    <span class="close-splitter-modal">❌</span>
+                </div>
+                <!-- Toolbar -->
+                <div class="splitter-row splitter-toolbar">
+                    <div>
+                        <button id="addClipBtn">➕ Add Clip</button>
+                    </div>
+                    <div>
+                        <label class="output-label">Output:</label>
+                        <select id="selectOutputFormat">
+                            <option value="mp4">mp4</option>
+                            <option value="mp3" selected>mp3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="output-label">Mode:</label>
+                        <select id="splitMode">
+                            <option value="join" selected>Split & Join</option>
+                            <option value="separate">Separate Clips</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button id="exportClipsBtn">📤Export</button>
+                        <button id="importClipsBtn">📥Import</button>
+                        <input type="file" id="clipCsvInput" accept=".csv" hidden />
+                    </div>
+                </div>
+                <!-- Clip Table -->
+                <div class="splitter-row table-row">
+                    <div class="clip-table-wrapper">
+                        <table id="clipTable">
+                            <thead>
+                                <tr>
+                                    <th id="toggleAllHeader" class="clickable-header" title="Toggle All Clips">☑</th>
+                                    <th>#</th>
+                                    <th id="setStartHeader" class="clickable-header">Start Time</th>
+                                    <th id="setEndHeader" class="clickable-header">End Time</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clipTableBody">
+                                <tr class="selected-row">
+                                    <td><input type="checkbox" class="clip-check" checked /></td>
+                                    <td>1</td>
+                                    <td contenteditable="true">00:00:00:000</td>
+                                    <td contenteditable="true">00:00:00:000</td>
+                                    <td>00:00:00:000</td>
+                                    <td class="clip-actions">
+                                        <button class="preview-btn" title="Preview Clip">▶</button>
+                                        <button class="move-up-btn" title="Move Earlier">⇧</button>
+                                        <button class="move-down-btn" title="Move Later">⇩</button>
+                                        <button class="delete-btn" title="Delete Clip">✖</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="clip-summary-wrapper">
+                        <table id="clipSummaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Clips</th>
+                                    <th>Duration</th>
+                                    <th>%</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-type="selected">
+                                    <td>☑️ Selected</td>
+                                    <td id="selectedClipCount">0</td>
+                                    <td id="selectedDuration">00:00:00:000</td>
+                                    <td id="selectedPercent">0%</td>
+                                    <td>
+                                        <button class="stats-play-btn" data-play="selected">▶</button>
+                                    </td>
+                                </tr>
+                                <tr data-type="unselected">
+                                    <td>🟪 Unselected</td>
+                                    <td id="unselectedClipCount">0</td>
+                                    <td id="unselectedDuration">00:00:00:000</td>
+                                    <td id="unselectedPercent">0%</td>
+                                    <td>
+                                        <button class="stats-play-btn" data-play="unselected">▶</button>
+                                    </td>
+                                </tr>
+                                <tr data-type="all">
+                                    <td><b>Total</b></td>
+                                    <td id="totalClipCount">0</td>
+                                    <td id="totalDuration">00:00:00:000</td>
+                                    <td>100%</td>
+                                    <td>
+                                        <button class="stats-play-btn" data-play="all">▶</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button id="addGroupBtn">➕ Add Group</button>
+                        <table id="groupTable">
+                            <thead>
+                                <tr>
+                                    <th>Group Name</th>
+                                    <th>Clips</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="groupTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div class="splitter-row">
+                    <button id="splitBtn">Split & Join</button>
+                    <button id="downloadBtn" disabled>💾</button>
+                    <button id="clrBtn">Clear</button>
+                </div>
+            </div>
+            <!-- Floating Preview Player Window -->
+            <div id="previewWindow" class="preview-window hidden">
+                <div class="title-bar">
+                    <span class="title">🎬 Preview</span>
+                    <span id="closePreview" class="close-preview">❌</span>
+                </div>
+                <div class="preview-body">
+                    <video id="split-player" controls></video>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
