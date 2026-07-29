@@ -1433,6 +1433,154 @@ function makeResizable(el, options = {}) {
         document.removeEventListener("mouseup", closeResizeElement);
     }
 }
+function makeTouchResizable(el, options = {}) {
+    const MIN_WIDTH = options.minWidth || 200;
+    const MIN_HEIGHT = options.minHeight || 150;
+
+    el.style.touchAction = "none";
+
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const HANDLE_SIZE = isTouch ? 34 : 20;
+    const EDGE_SIZE = isTouch ? 18 : 10;
+
+    // Remove existing resizers (if any)
+    el.querySelectorAll(".resizer").forEach((r) => r.remove());
+
+    const resizerDefs = [
+        // Corners
+        { class: "corner top-left", dir: "tl", cursor: "nwse-resize" },
+        { class: "corner top-right", dir: "tr", cursor: "nesw-resize" },
+        { class: "corner bottom-left", dir: "bl", cursor: "nesw-resize" },
+        { class: "corner bottom-right", dir: "br", cursor: "nwse-resize" },
+
+        // Edges
+        { class: "edge top", dir: "t", cursor: "ns-resize" },
+        { class: "edge bottom", dir: "b", cursor: "ns-resize" },
+        { class: "edge left", dir: "l", cursor: "ew-resize" },
+        { class: "edge right", dir: "r", cursor: "ew-resize" },
+    ];
+
+    resizerDefs.forEach((def) => {
+        const div = document.createElement("div");
+
+        div.className = "resizer " + def.class;
+        div.dataset.direction = def.dir;
+
+        div.style.position = "absolute";
+        div.style.background = "transparent";
+        div.style.zIndex = "100";
+        div.style.cursor = def.cursor;
+        div.style.touchAction = "none";
+        div.style.userSelect = "none";
+
+        if (def.class.startsWith("corner")) {
+            div.style.width = HANDLE_SIZE + "px";
+            div.style.height = HANDLE_SIZE + "px";
+
+            const offset = HANDLE_SIZE / 2;
+
+            if (def.dir.includes("t")) div.style.top = -offset + "px";
+            if (def.dir.includes("b")) div.style.bottom = -offset + "px";
+            if (def.dir.includes("l")) div.style.left = -offset + "px";
+            if (def.dir.includes("r")) div.style.right = -offset + "px";
+        } else {
+            if (def.dir === "t" || def.dir === "b") {
+                div.style.height = EDGE_SIZE + "px";
+                div.style.left = HANDLE_SIZE / 2 + "px";
+                div.style.right = HANDLE_SIZE / 2 + "px";
+
+                if (def.dir === "t") div.style.top = -(EDGE_SIZE / 2) + "px";
+                else div.style.bottom = -(EDGE_SIZE / 2) + "px";
+            } else {
+                div.style.width = EDGE_SIZE + "px";
+                div.style.top = HANDLE_SIZE / 2 + "px";
+                div.style.bottom = HANDLE_SIZE / 2 + "px";
+
+                if (def.dir === "l") div.style.left = -(EDGE_SIZE / 2) + "px";
+                else div.style.right = -(EDGE_SIZE / 2) + "px";
+            }
+        }
+
+        div.addEventListener("pointerdown", resizePointerDown);
+
+        el.appendChild(div);
+    });
+
+    let startX, startY, startWidth, startHeight, startLeft, startTop, currentDirection;
+
+    function resizePointerDown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        currentDirection = e.target.dataset.direction;
+
+        const rect = el.getBoundingClientRect();
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        startWidth = rect.width;
+        startHeight = rect.height;
+
+        startLeft = rect.left;
+        startTop = rect.top;
+
+        e.target.setPointerCapture(e.pointerId);
+
+        document.addEventListener("pointermove", elementResize);
+        document.addEventListener("pointerup", stopResize);
+        document.addEventListener("pointercancel", stopResize);
+    }
+
+    function elementResize(e) {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+
+        const dir = currentDirection;
+
+        if (dir.includes("r")) newWidth = startWidth + dx;
+
+        if (dir.includes("l")) {
+            newWidth = startWidth - dx;
+            newLeft = startLeft + dx;
+        }
+
+        if (dir.includes("b")) newHeight = startHeight + dy;
+
+        if (dir.includes("t")) {
+            newHeight = startHeight - dy;
+            newTop = startTop + dy;
+        }
+
+        if (newWidth < MIN_WIDTH) {
+            newWidth = MIN_WIDTH;
+
+            if (dir.includes("l")) newLeft = startLeft + startWidth - MIN_WIDTH;
+        }
+
+        if (newHeight < MIN_HEIGHT) {
+            newHeight = MIN_HEIGHT;
+
+            if (dir.includes("t")) newTop = startTop + startHeight - MIN_HEIGHT;
+        }
+
+        el.style.width = newWidth + "px";
+        el.style.height = newHeight + "px";
+        el.style.left = newLeft + "px";
+        el.style.top = newTop + "px";
+    }
+
+    function stopResize() {
+        document.removeEventListener("pointermove", elementResize);
+        document.removeEventListener("pointerup", stopResize);
+        document.removeEventListener("pointercancel", stopResize);
+    }
+}
 
 //TODO:-----------Text Editor Utility------------------------
 function joinSelectedLines(textarea) {

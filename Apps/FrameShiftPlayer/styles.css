@@ -6,28 +6,41 @@ body {
     position: fixed;
     top: 80px;
     left: 120px;
-    width: 640px;
-    height: 420px;
+
+    width: min(640px, calc(100vw - 40px));
+    height: min(420px, calc(100vh - 100px));
+
     background: #1e1e1e;
     border-radius: 12px;
+    border: 2px solid #464545;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
-    z-index: 999999;
     overflow: hidden;
-    outline: none;
-    border: 2px solid #464545;
+    box-sizing: border-box;
+    z-index: 999999;
+}
+
+@media (max-width: 480px) {
+    #frameShiftPlayer {
+        top: 10px;
+        left: 10px;
+        width: calc(100vw - 10px);
+        border-radius: 8px;
+    }
 }
 
 /* Title Bar */
 #frameShiftPlayer .title-bar {
-    height: 40px;
+    height: fit-content;
     background: #2d2d2d;
     color: white;
     display: flex;
     align-items: center;
+    gap: 5px;
     justify-content: space-between;
-    padding: 0 12px;
+    flex-wrap: wrap;
+    padding: 5px 12px;
     font-size: 14px;
     user-select: none;
 }
@@ -98,7 +111,7 @@ body {
     display: none;
     position: absolute;
     top: 20px;
-    left: -60px;
+    right: 0;
     background-color: rgb(29 38 32);
     grid-template-columns: repeat(4, 1fr);
     gap: 5px;
@@ -164,14 +177,16 @@ body {
 
 /* Controls */
 #frameShiftPlayer .controls {
-    height: 35px;
+    height: fit-content;
     background: #2d2d2d;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 6px;
     gap: 5px;
     box-sizing: content-box;
     position: relative;
+    flex-wrap: wrap;
 }
 
 #frameShiftPlayer .controls button {
@@ -181,6 +196,12 @@ body {
     padding: 8px 8px;
     border-radius: 4px;
     cursor: pointer;
+}
+
+@media (max-width: 480px) {
+    #frameShiftPlayer .controls button {
+        padding: 4px 4px;
+    }
 }
 
 #frameShiftPlayer .controls button:hover {
@@ -430,7 +451,14 @@ body {
     border: 2px solid #0280b7;
 }
 
+@media (max-width: 480px) {
+    #frameShiftPlayer .transcript {
+        width: 400px;
+    }
+}
+
 #frameShiftPlayer .transcript .title-bar {
+    width: 100%;
     position: sticky;
     top: 0;
     display: flex;
@@ -801,6 +829,19 @@ body {
 
 .splitter-row [contenteditable] {
     white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    #clipTable th:nth-child(3),
+    #clipTable td:nth-child(3),
+    #clipTable th:nth-child(4),
+    #clipTable td:nth-child(4),
+    #clipTable th:nth-child(5),
+    #clipTable td:nth-child(5),
+    #clipTable th:nth-child(6),
+    #clipTable td:nth-child(6) {
+        width: 75px;
+    }
 }
 
 /* =====================================

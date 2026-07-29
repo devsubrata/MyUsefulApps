@@ -62,7 +62,10 @@ nav a {
 }
 
 .tools-container {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding: 2rem;
 }
 
@@ -83,8 +86,9 @@ nav a {
 }
 
 .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
     max-width: 1200px; /* centralize grid */
     margin: 0 auto;
     gap: 1.5rem; /* uniform gap between rows & columns */

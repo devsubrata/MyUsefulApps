@@ -17,7 +17,8 @@ const framePlayer = document.getElementById("frameShiftPlayer");
 /* Enable drag + resize (Already provided by user) */
 // makeDraggable(framePlayer);
 makeTouchDraggable(framePlayer);
-makeResizable(framePlayer);
+// makeResizable(framePlayer);
+makeTouchResizable(framePlayer);
 
 framePlayer.querySelector("#placeFpLeftBtn").onclick = () => resizeLeftHalf(framePlayer);
 framePlayer.querySelector("#placeFpRightBtn").onclick = () => resizeRightHalf(framePlayer);
@@ -25,7 +26,11 @@ framePlayer.querySelector("#placeFpRightBtn").onclick = () => resizeRightHalf(fr
 const previewWindow = document.getElementById("previewWindow");
 // makeDraggable(previewWindow);
 makeTouchDraggable(previewWindow);
-makeResizable(previewWindow, {
+// makeResizable(previewWindow, {
+//     minWidth: 300,
+//     minHeight: 200,
+// });
+makeTouchResizable(previewWindow, {
     minWidth: 300,
     minHeight: 200,
 });
@@ -220,14 +225,15 @@ captureBtn.onclick = async () => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0);
 
-    /* Convert canvas → blob (IMPORTANT ⭐) */
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+
+    if (!blob) return;
 
     const now = new Date();
     const pad = (n) => n.toString().padStart(2, "0");
 
     const filename =
-        now.getFullYear().toString() +
+        now.getFullYear() +
         pad(now.getMonth() + 1) +
         pad(now.getDate()) +
         "-" +
@@ -236,11 +242,29 @@ captureBtn.onclick = async () => {
         pad(now.getSeconds()) +
         ".png";
 
-    chrome.runtime.sendMessage({
-        action: "saveFrame",
-        filename: `${currentFileBaseName}/${filename}`,
-        url: URL.createObjectURL(blob),
-    });
+    const objectURL = URL.createObjectURL(blob);
+
+    // Chrome Extension
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id) {
+        chrome.runtime.sendMessage({
+            action: "saveFrame",
+            filename: `${currentFileBaseName}/${filename}`,
+            url: objectURL,
+        });
+    }
+    // Normal Website (Desktop + Mobile)
+    else {
+        const a = document.createElement("a");
+        a.href = objectURL;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // Free memory
+        setTimeout(() => URL.revokeObjectURL(objectURL), 1000);
+    }
+
     showHUD("📸");
 };
 
@@ -434,6 +458,7 @@ function createBookmarkDisplay() {
                 <div>
                     <button id="exportBookmarks" title="Export bookmarks">EXP</button>
                     <button id="importBookmarks" title="Import bookmarks">IMP</button>
+                    <input type="file" id="csvBookmarkInput" accept=".csv" hidden />
                 </div>
                 <div>
                     <button id="moveUpBookmark" title="Move up selected bookmarks">🔼</button>
@@ -445,10 +470,19 @@ function createBookmarkDisplay() {
 
     // makeDraggable(bookmarkWindow);
     makeTouchDraggable(bookmarkWindow);
-    makeResizable(bookmarkWindow);
+    // makeResizable(bookmarkWindow);
+    makeTouchResizable(bookmarkWindow);
 
     document.getElementById("exportBookmarks").onclick = exportCSV;
-    document.getElementById("importBookmarks").onclick = () => importCSV(null);
+    document.getElementById("importBookmarks").onclick = () => {
+        document.getElementById("csvBookmarkInput").click();
+    };
+    document.getElementById("csvBookmarkInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        await importCSV(file, false);
+        document.getElementById("csvBookmarkInput").value = "";
+    });
     document.getElementById("closeBookmarkWindow").onclick = () => bookmarkWindow.remove();
 
     renderBookmarkTable();
@@ -608,31 +642,14 @@ async function exportCSV() {
     }
 }
 
-async function importCSV(dropFile) {
+async function importCSV(file, fromDrop = true) {
     try {
-        let file;
-        if (!dropFile) {
-            const [fileHandle] = await window.showOpenFilePicker({
-                types: [
-                    {
-                        description: "CSV file",
-                        accept: { "text/csv": [".csv", ".CSV"] },
-                    },
-                ],
-                multiple: false,
-            });
-            file = await fileHandle.getFile();
-        } else {
-            file = dropFile;
-        }
-
         const reader = new FileReader();
 
         reader.onload = function () {
             const lines = reader.result.split("\n").slice(1);
 
             bookmarks = [];
-
             lines.forEach((line) => {
                 if (!line.trim()) return;
 
@@ -645,7 +662,8 @@ async function importCSV(dropFile) {
                     name,
                 });
             });
-            if (dropFile) createBookmarkDisplay();
+
+            if (fromDrop) createBookmarkDisplay();
             else renderBookmarkTable();
         };
 
@@ -895,9 +913,8 @@ document.getElementById("decrease-transcript-font").onclick = () => {
     transcriptContent.style.fontSize = currentSize - 2 + "px";
 };
 
-// makeDraggable(transcriptWindow);
 makeTouchDraggable(transcriptWindow);
-makeResizable(transcriptWindow);
+makeTouchResizable(transcriptWindow);
 
 // TODO:----------Media Splitter feature---------------
 
