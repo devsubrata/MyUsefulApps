@@ -18,6 +18,9 @@ const DEFAULT_MAX = 340; // px, cap for the first automatic fit
 const GUTTER = 44; // px, width of the row-number column
 
 const $ = (id) => document.getElementById(id);
+const qsa = (selctor) => document.querySelectorAll(selctor);
+const qs = (selctor) => document.querySelector(selctor);
+
 const el = {
     src: $("src"),
     mount: $("mount"),
@@ -42,6 +45,8 @@ const state = {
     widths: [], // px per column, undefined until measured
     heights: [], // px per row, undefined = automatic
 };
+
+const borderState = {};
 
 // ---------- Parsing ----------
 
@@ -208,7 +213,7 @@ function render() {
                 box.textContent = o.dash ? "—" : " ";
                 if (o.dash) box.classList.add("opacity-40");
             } else {
-                box.textContent = text;
+                box.innerHTML = highlightCellText(text);
             }
             td.title = text;
             td.append(box);
@@ -237,7 +242,80 @@ function render() {
     if (p.padded) bits.push(`${p.padded} short ${p.padded === 1 ? "row" : "rows"} padded`);
     el.stats.textContent = bits.join(" · ");
     el.copy.disabled = el.copyHtml.disabled = false;
+
+    borderState.table = {
+        borderCollapse: qs("table").style.borderCollapse,
+        border: qs("table").style.border,
+    };
+    borderState.th = Array.from(qsa("th")).map((th) => ({ element: th, border: th.style.border }));
+    borderState.td = Array.from(qsa("td")).map((td) => ({ element: td, border: td.style.border }));
 }
+
+function applyGridBorders(thickness, color) {
+    const table = qs("table");
+    if (!table) return;
+    // 2. Apply the clean, un-thickened grid lines
+    const newBorder = `${thickness} solid ${color}`;
+    table.style.borderCollapse = "collapse";
+    table.style.border = newBorder;
+
+    qsa("th").forEach((th) => (th.style.border = newBorder));
+    qsa("td").forEach((td) => (td.style.border = newBorder));
+}
+
+function resetGridBorders() {
+    const table = qs("table");
+    if (!table) return;
+    table.style.borderCollapse = borderState.table.borderCollapse;
+    table.style.border = borderState.table.border;
+    qsa("th").forEach((th, i) => (th.style.border = borderState.th[i].border));
+    qsa("td").forEach((td, i) => (td.style.border = borderState.td[i].border));
+}
+
+let gridEnabled = false;
+document.getElementById("o-grid").onclick = () => {
+    if (!gridEnabled) {
+        applyGridBorders("1px", qs("#grid-color").value);
+        gridEnabled = true;
+    } else {
+        resetGridBorders();
+        gridEnabled = false;
+    }
+};
+
+qs("#grid-color").addEventListener("input", (e) => {
+    applyGridBorders("1px", qs("#grid-color").value);
+    styleTableHeader();
+    gridEnabled = true;
+});
+
+function styleTableHeader() {
+    document.querySelectorAll("table tr:first-child :is(td, th)").forEach((cell) => {
+        cell.style.fontWeight = "bold";
+        cell.style.textAlign = "center";
+        cell.style.backgroundColor = qs("#grid-color").value + "33"; // Set background color to the selected grid color
+    });
+}
+
+document.getElementById("o-first-row").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        styleTableHeader();
+    } else {
+        document.querySelectorAll("table tr:first-child :is(td, th)").forEach((cell) => {
+            cell.style.fontWeight = "normal";
+            cell.style.textAlign = "left";
+            cell.style.backgroundColor = "white"; // Reset background color to white
+        });
+    }
+});
+
+qs("#o-first-row-grid").onclick = () => {
+    // Flip the status
+    const checkbox = qs("#o-first-row");
+    checkbox.checked = !checkbox.checked;
+    // Force the change event to fire manually
+    checkbox.dispatchEvent(new Event("change"));
+};
 
 // Push widths and heights from state into the DOM.
 function applySizes() {
@@ -382,6 +460,7 @@ el.copy.addEventListener("click", async () => {
         say("Clipboard is blocked. The text is selected below: press Ctrl+C.");
     }
 });
+
 el.copyHtml.addEventListener("click", async () => {
     const html = buildHtml();
     try {
@@ -397,24 +476,33 @@ el.copyHtml.addEventListener("click", async () => {
 });
 
 // ---------- Wiring ----------
-
 const save = () => {
     try {
         localStorage.setItem(STORE_KEY, el.src.value);
     } catch {}
 };
 
+function checkAndApplyStyle() {
+    if (gridEnabled) applyGridBorders("1px", qs("#grid-color").value);
+    if (qs("#o-first-row").checked) styleTableHeader();
+    qs("table").style.fontSize = localStorage.getItem("TABLE_FONT_SIZE") || "14px";
+}
+
 el.src.addEventListener("input", () => {
     save();
     render();
+    checkAndApplyStyle();
 });
+
 [el.header, el.wrap, el.rulers, el.zebra, el.first, el.dash, el.density].forEach((c) =>
     c.addEventListener("change", () => {
         // Header, bold and spacing change text metrics, so widths measured earlier are stale.
-        if (c === el.header || c === el.first || c === el.density || c === el.dash) state.widths = [];
+        // if (c === el.header || c === el.first || c === el.density || c === el.dash) state.widths = [];
         render();
+        checkAndApplyStyle();
     }),
 );
+
 $("btn-example").addEventListener("click", () => {
     el.src.value = SAMPLE;
     save();
@@ -437,3 +525,68 @@ try {
 } catch {}
 el.src.value = stored.trim() ? stored : SAMPLE;
 render();
+
+qs("#increaseFontSize").addEventListener("click", () => {
+    const table = qs("table");
+    if (!table) return;
+    const currentSize = parseFloat(getComputedStyle(table).fontSize);
+    const newSize = currentSize + 1;
+    table.style.fontSize = newSize + "px";
+    localStorage.setItem("TABLE_FONT_SIZE", newSize + "px");
+});
+
+qs("#decreaseFontSize").addEventListener("click", () => {
+    const table = qs("table");
+    if (!table) return;
+    const currentSize = parseFloat(getComputedStyle(table).fontSize);
+    const newSize = currentSize - 1;
+    table.style.fontSize = newSize + "px";
+    localStorage.setItem("TABLE_FONT_SIZE", newSize + "px");
+});
+
+qs("#main-elm-move-toggle-btn").addEventListener("click", () => {
+    const main = qs("main");
+    main.style.marginLeft = main.style.marginLeft === "10px" ? "auto" : "10px";
+});
+
+qs("#increase-table-height-btn").addEventListener("click", () => {
+    const tableArea = qs("#mount");
+    tableArea.style.height = parseFloat(getComputedStyle(tableArea).height) + 10 + "px";
+});
+
+document.getElementById("o-grid").click();
+if (document.getElementById("o-first-row").checked) styleTableHeader();
+
+function highlightCellText(text, colorIndex = 14) {
+    const colors = [
+        "text-[#FF0000]", // 0
+        "text-[#990033]", // 1
+        "text-[#ff0066]", // 2
+        "text-[#e63804]", // 3
+        "text-[#B37400]", // 4
+        "text-[#5fb503]", // 5
+        "text-[#009c1a]", // 6
+        "text-[#0000FF]", // 7
+        "text-[#0404bb]", // 8
+        "text-[#d303d3]", // 9
+        "text-[#FF69B4]", // 10
+        "text-[#E97451]", // 11
+        "text-[#9400D3]", // 12
+        "text-[#4B0082]", // 13
+        "text-[#6600ff]", // 14
+        "text-[#e48f05]", // 15
+        "text-[#04cab6]", // 16
+        "text-[#f53928]", // 17
+        "text-[#151201]", // 18
+        "text-[#512d01]", // 19
+        "text-[#e8474a]", // 20
+    ];
+
+    const highlightedText = text.replace(/(\d+)?\*(.*?)\*/g, (match, index, content) => {
+        const i = index ? Number(index) : colorIndex;
+        const colorClass = colors[i];
+        return `<span class="font-semibold ${colorClass}">${content.trim()}</span>`;
+    });
+
+    return highlightedText;
+}

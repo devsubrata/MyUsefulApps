@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Pipe Table Builder</title>
+        <title>HTML Table Generator</title>
 
         <script src="https://cdn.tailwindcss.com/3.4.17"></script>
         <script>
@@ -30,9 +30,9 @@
     <body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased">
         <main class="mx-auto max-w-6xl px-4 py-8 grid gap-6">
             <!-- 1. Heading and instructions -->
-            <header>
-                <h1 class="text-2xl font-semibold tracking-tight">Pipe Table Builder</h1>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400 max-w-prose">
+            <header class="text-center">
+                <h1 class="text-3xl font-semibold tracking-tight text-indigo-900">HTML Table Generator</h1>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
                     Paste rows separated by <code class="font-mono text-xs px-1 rounded bg-slate-200 dark:bg-slate-800">|</code>. Drag a column or row
                     border to resize it, like in Excel. Double-click a border to fit it to its content.
                 </p>
@@ -53,7 +53,7 @@
                     id="src"
                     spellcheck="false"
                     wrap="off"
-                    rows="10"
+                    rows="5"
                     class="w-full font-mono text-xs leading-6 whitespace-pre overflow-auto resize-y rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-3 focus:outline-2 focus:outline-teal-600"
                     placeholder="Type | Example | Notes&#10;Row one | first | second"
                 ></textarea>
@@ -72,58 +72,113 @@
                 <div class="flex gap-8">
                     <div>
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-header" class="size-4 accent-teal-700" checked />
+                            <input type="checkbox" id="o-header" class="size-4 accent-teal-700" />
                             <span>First line is header</span>
                         </label>
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-wrap" class="size-4 accent-teal-700" checked />
+                            <input type="checkbox" id="o-wrap" class="size-4 accent-teal-700" />
                             <span>Wrap text</span>
                         </label>
-                    </div>
-                    <div>
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-rulers" class="size-4 accent-teal-700" checked />
+                            <input type="checkbox" id="o-rulers" class="size-4 accent-teal-700" />
                             <span>Column letters and row numbers</span>
                         </label>
+                    </div>
+                    <div>
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-zebra" class="size-4 accent-teal-700" checked />
+                            <input type="checkbox" id="o-zebra" class="size-4 accent-teal-700" />
                             <span>Striped rows</span>
+                        </label>
+                        <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
+                            <input type="checkbox" id="o-first" class="size-4 accent-teal-700" />
+                            <span>Bold first column</span>
                         </label>
                     </div>
                     <div>
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-first" class="size-4 accent-teal-700" checked />
-                            <span>Bold first column</span>
-                        </label>
-                        <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                            <input type="checkbox" id="o-dash" class="size-4 accent-teal-700" checked />
+                            <input type="checkbox" id="o-dash" class="size-4 accent-teal-700" />
                             <span>Dash in empty cells</span>
                         </label>
                     </div>
                 </div>
                 <div class="flex items-center justify-between gap-4 py-1.5 border-b border-slate-100 dark:border-slate-800">
-                    <div>
+                    <div class="flex items-center gap-2">
                         <label for="o-density">Spacing</label>
                         <select id="o-density" class="rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1">
-                            <option value="compact">Compact</option>
-                            <option value="cozy" selected>Cozy</option>
+                            <option value="compact" selected>Compact</option>
+                            <option value="cozy">Cozy</option>
                             <option value="roomy">Roomy</option>
                         </select>
+                        <div class="flex items-center gap-1">
+                            <button
+                                type="button"
+                                id="o-grid"
+                                class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                Grid
+                            </button>
+                            <button
+                                type="button"
+                                id="o-first-row-grid"
+                                class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                StyleFirstRow
+                            </button>
+                            <input
+                                type="color"
+                                id="grid-color"
+                                value="#0aac83"
+                                class="w-13 h-8 rounded-md border border-slate-300 dark:border-slate-700 cursor-pointer overflow-hidden p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
+                            />
+                            <input type="checkbox" id="o-first-row" class="size-4 accent-teal-700" checked hidden />
+                        </div>
                     </div>
                     <div>
+                        <button
+                            type="button"
+                            id="increaseFontSize"
+                            title="Increase font size"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ➕
+                        </button>
+                        <button
+                            type="button"
+                            id="decreaseFontSize"
+                            title="Decrease font size"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ➖
+                        </button>
+                        <button
+                            type="button"
+                            id="main-elm-move-toggle-btn"
+                            title="Move main element left or center"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ❮ ❯
+                        </button>
+                        <button
+                            type="button"
+                            id="increase-table-height-btn"
+                            title="Increase table height"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ⮟
+                        </button>
                         <button
                             type="button"
                             id="btn-fit"
                             class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
-                            Fit all columns
+                            Fit
                         </button>
                         <button
                             type="button"
                             id="btn-reset"
                             class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
-                            Reset sizes
+                            Reset
                         </button>
                     </div>
                     <div class="flex flex-wrap gap-2">
