@@ -590,3 +590,27 @@ function highlightCellText(text, colorIndex = 14) {
 
     return highlightedText;
 }
+
+function createTable(rows, columns) {
+    const lines = [];
+
+    for (let r = 1; r <= rows; r++) {
+        const cells = [];
+
+        for (let c = 1; c <= columns; c++) {
+            cells.push(`row${r}col${c}`);
+        }
+
+        lines.push(cells.join(" | "));
+    }
+
+    return lines.join("\n");
+}
+
+qs("#btn-sample").onclick = () => {
+    const rows = parseInt(qs("#rows").value) || 6;
+    const columns = parseInt(qs("#columns").value) || 5;
+    qs("#src").value = createTable(rows, columns);
+    render();
+    checkAndApplyStyle();
+};
