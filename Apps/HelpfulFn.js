@@ -1583,6 +1583,113 @@ function makeTouchResizable(el, options = {}) {
 }
 
 //TODO:-----------Text Editor Utility------------------------
+let lastState = null;
+function saveUndoState(textarea) {
+    lastState = {
+        value: textarea.value,
+        selectionStart: textarea.selectionStart,
+        selectionEnd: textarea.selectionEnd,
+    };
+}
+
+function undoLastAction(textarea) {
+    if (!lastState) return;
+
+    textarea.value = lastState.value;
+    textarea.selectionStart = lastState.selectionStart;
+    textarea.selectionEnd = lastState.selectionEnd;
+
+    textarea.focus();
+
+    lastState = null;
+}
+
+//**-----Find & Replace------
+function findAndReplace(textarea, replaceItem, newLine = false) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const content = textarea.value;
+
+    // const newLine = document.getElementById("add-new-line").checked;
+    let repetition = null;
+
+    if (replaceItem.includes("❗")) {
+        repetition = parseInt(replaceItem.split("❗")[1]);
+        replaceItem = replaceItem.split("❗")[0];
+    }
+
+    // Nothing selected: prefix lines from the cursor onward
+    if (start === end) {
+        saveUndoState(textarea);
+
+        let counter = 0;
+        const numSequence = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+        const letterSequence = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+        const before = content.slice(0, start);
+        const after = content.slice(start);
+
+        const createNewLineSeqence = (sequence) => {
+            let seq = "";
+            for (let i = 0; i < (repetition || 1); i++) seq += `${sequence[counter++ % sequence.length]}\n`;
+            return seq.trimEnd();
+        };
+
+        if (replaceItem.includes("🔢")) {
+            let afterText = newLine
+                ? createNewLineSeqence(numSequence) + after
+                : after.replace(/^/gm, () => {
+                      const symbol = numSequence[counter];
+                      if (repetition && counter >= repetition) return "";
+                      counter++;
+                      if (counter === numSequence.length) counter = 0;
+                      return symbol;
+                  });
+            textarea.value = before + afterText;
+        } else if (replaceItem === "1") {
+            let afterText = newLine
+                ? createNewLineSeqence(Array.from({ length: repetition || 1 }, (_, i) => `${i + 1}. `)) + after
+                : after.replace(/^/gm, () => {
+                      if (repetition && counter >= repetition) return "";
+                      return `${++counter}. `;
+                  });
+            textarea.value = before + afterText;
+        } else if (replaceItem === "a") {
+            textarea.value = before + after.replace(/^/gm, () => `${letterSequence[counter++ % letterSequence.length]}). `);
+        } else {
+            let afterText = newLine
+                ? `${replaceItem}\n`.repeat(repetition || 1).trimEnd() + after
+                : after.replace(/^/gm, () => {
+                      if (repetition && counter >= repetition) return "";
+                      counter++;
+                      return replaceItem;
+                  });
+            textarea.value = before + afterText;
+        }
+
+        textarea.focus();
+        textarea.setSelectionRange(start, start);
+        return;
+    }
+
+    // Something selected: replace all occurrences
+    saveUndoState(textarea);
+
+    const findItem = content.slice(start, end);
+
+    let startQuote = `"`;
+    let endQuote = `"`;
+    if (replaceItem.includes("🟩")) {
+        [startQuote, endQuote] = replaceItem.split("🟩");
+        const before = content.slice(0, start);
+        const middle = `${startQuote}${content.slice(start, end)}${endQuote}`;
+        const after = content.slice(end);
+        textarea.value = before + middle + after;
+    } else textarea.value = content.split(findItem).join(`${replaceItem}\n`.repeat(repetition || 1).trimEnd());
+
+    // textarea.focus();
+}
+
 function joinSelectedLines(textarea) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;

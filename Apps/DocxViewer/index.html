@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>DOCX Viewer</title>
+
+        <!-- Inter font from Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+        <!-- Page styles -->
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="wrap">
+            <!-- ===== Page heading ===== -->
+            <div class="title">
+                <h1>DOCX <span>Viewer</span></h1>
+                <p>Preview Word documents right in your browser. Files never leave your device.</p>
+            </div>
+
+            <!-- ===== Drag & drop upload area =====
+         A <label> wrapping the hidden file input means clicking
+         anywhere in the zone opens the native file picker. -->
+            <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a .docx file">
+                <input type="file" id="fileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+
+                <!-- Large version (shown before a file is chosen) -->
+                <div class="big">
+                    <div class="icon-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 16V4" />
+                            <path d="M7 9l5-5 5 5" />
+                            <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                        </svg>
+                    </div>
+                    <h2>Drag &amp; drop your document here</h2>
+                    <p class="hint">or <b>click to browse</b> from your computer</p>
+                    <div class="badges">
+                        <span class="badge">.docx</span>
+                        <span class="badge">Private &amp; local</span>
+                    </div>
+                </div>
+
+                <!-- Compact version (shown after a file is loaded) -->
+                <div class="compact-text">Drop another file or <b>click to replace</b></div>
+            </label>
+
+            <!-- ===== Error message box (hidden until needed) ===== -->
+            <div class="toast" id="toast"></div>
+
+            <!-- ===== File info bar: name, size, status, remove button ===== -->
+            <div class="filebar" id="filebar">
+                <div class="file-ico">DOCX</div>
+                <div class="file-meta">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-sub">
+                        <span class="dot" id="dot"></span>
+                        <span id="fileSub"></span>
+                    </div>
+                </div>
+                <button class="clear" id="clearBtn" title="Remove file" aria-label="Remove file">&times;</button>
+            </div>
+
+            <!-- ===== Loading spinner ===== -->
+            <div class="spinner" id="spinner"></div>
+
+            <!-- ===== Viewer wrapper: toolbar + resizable preview area ===== -->
+            <div class="viewer-wrap" id="viewerWrap">
+                <!-- Zoom toolbar -->
+                <div class="toolbar">
+                    <div class="tool-group">
+                        <button class="tool-btn" id="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+                        <span class="zoom-label" id="zoomLabel">100%</span>
+                        <button class="tool-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+                    </div>
+                    <button class="tool-btn text" id="zoomFit" title="Fit page to width">Fit width</button>
+                    <button class="tool-btn text" id="zoomReset" title="Reset zoom to 100%">100%</button>
+                    <span class="tool-hint">Ctrl + scroll to zoom</span>
+                </div>
+
+                <!-- Scrollable preview area (this is the element that gets resized) -->
+                <div class="viewer" id="viewer">
+                    <div id="container"></div>
+                </div>
+
+                <!-- Resize handles: right edge (width), bottom edge (height), corner (both).
+       Double-click any handle to restore the default size. -->
+                <div class="rh rh-right" id="rhRight" title="Drag to resize width"></div>
+                <div class="rh rh-bottom" id="rhBottom" title="Drag to resize height"></div>
+                <div class="rh rh-corner" id="rhCorner" title="Drag to resize"></div>
+            </div>
+        </div>
+
+        <!-- Libraries: JSZip (required by docx-preview) and docx-preview -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+
+        <!-- Our own logic -->
+        <script src="script.js"></script>
+    </body>
+</html>

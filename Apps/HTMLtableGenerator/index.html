@@ -25,6 +25,7 @@
                 user-select: none;
             }
         </style>
+        <script src="../HelpfulFn.js"></script>
     </head>
 
     <body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased">
@@ -48,17 +49,65 @@
                             id="rows"
                             min="1"
                             placeholder="row"
-                            class="w-[70px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1"
+                            class="w-[50px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1"
                         />
                         <input
                             type="number"
                             id="columns"
                             min="1"
                             placeholder="column"
-                            class="w-[70px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1"
+                            class="w-[50px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1"
                         />
                         <button type="button" id="btn-sample" class="rounded-md bg-indigo-700 text-white text-sm px-3 py-1.5 hover:bg-indigo-800">
                             Create Table
+                        </button>
+                    </div>
+                    <div class="flex gap-1 text-sm">
+                        <input
+                            id="input-fnr"
+                            min="1"
+                            placeholder="find and replace"
+                            class="w-[100px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-0 text-xl"
+                        />
+                        <button
+                            type="button"
+                            id="btn-fnr"
+                            title="Find and Replace"
+                            class="rounded-md bg-indigo-700 text-white text-sm px-3 py-1.5 hover:bg-indigo-800"
+                        >
+                            FnR
+                        </button>
+                        <button
+                            type="button"
+                            id="btn-undo"
+                            title="Undo last change"
+                            class="rounded-md bg-green-700 text-white text-sm px-3 py-1.5 hover:bg-green-800"
+                        >
+                            ↺
+                        </button>
+                        <button
+                            type="button"
+                            id="increaseSrcFontSize"
+                            title="Increase font size"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-1.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ➕
+                        </button>
+                        <button
+                            type="button"
+                            id="decreaseSrcFontSize"
+                            title="Decrease font size"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-1.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            ➖
+                        </button>
+                        <button
+                            type="button"
+                            id="wrapSrcText"
+                            title="Wrap / unwrap"
+                            class="rounded-md border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        >
+                            W
                         </button>
                     </div>
                     <div class="flex gap-3 text-sm">
@@ -71,16 +120,10 @@
                 <textarea
                     id="src"
                     spellcheck="false"
-                    wrap="off"
                     rows="7"
                     class="w-full font-mono text-sm leading-6 whitespace-pre overflow-auto resize-y rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-3 focus:outline-2 focus:outline-teal-600"
                     placeholder="Type | Example | Notes&#10;Row one | first | second"
                 ></textarea>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    A leading <code class="font-mono">|</code> leaves the first cell empty, <code class="font-mono">a | | c</code> leaves the middle
-                    one empty, a trailing <code class="font-mono">|</code> leaves the last one empty. Short rows are padded. Tab-separated data also
-                    works.
-                </p>
             </section>
 
             <!-- 3. Options -->
@@ -122,11 +165,22 @@
                 </div>
                 <div class="flex items-center justify-between gap-4 py-1.5 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-2">
-                        <label for="o-density">Spacing</label>
-                        <select id="o-density" class="rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1">
+                        <select id="o-density" title="Spacing" class="rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1">
                             <option value="compact" selected>Compact</option>
                             <option value="cozy">Cozy</option>
                             <option value="roomy">Roomy</option>
+                        </select>
+                        <select id="selectFont" title="Select Font" class="rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-1">
+                            <option value="Arial">Arial</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Roboto Slab">Roboto slab</option>
+                            <option value="Tahoma">Tahoma</option>
+                            <option value="Open Sans">Open sans</option>
+                            <option value="Product Sans Light">Product sans</option>
+                            <option value="Anthropic Sans Display Light" selected>Anthropic Sans</option>
+                            <option value="Nunito Sans">Nunito Sans</option>
+                            <option value="Nunito">Nunito</option>
+                            <option value="BBC Reith Sans">ReithSans</option>
                         </select>
                         <div class="flex items-center gap-1">
                             <button

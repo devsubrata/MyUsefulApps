@@ -36,6 +36,9 @@ const el = {
     copy: $("btn-copy"),
     copyHtml: $("btn-html"),
     htmlOut: $("htmlout"),
+    btnFnR: $("btn-fnr"),
+    inputFnR: $("input-fnr"),
+    btnUndo: $("btn-undo"),
 };
 
 // Sizes live outside the DOM so they survive re-renders while you keep typing.
@@ -86,6 +89,7 @@ const opts = () => ({
     first: el.first.checked,
     dash: el.dash.checked,
     density: el.density.value,
+    inputFnR: el.inputFnR.value,
 });
 
 const PAD = { compact: ["px-2", "py-1", "text-[13px]", 16], cozy: ["px-3", "py-2", "text-sm", 24], roomy: ["px-4", "py-3.5", "text-[15px]", 32] };
@@ -95,6 +99,33 @@ function colLetter(i) {
     for (i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s;
     return s;
 }
+
+el.btnFnR.onclick = () => findAndReplace(el.src, opts().inputFnR);
+el.btnUndo.onclick = () => undoLastAction(el.src);
+$("increaseSrcFontSize").onclick = () => {
+    const currentSize = parseFloat(getComputedStyle(el.src).fontSize);
+    const newSize = currentSize + 1;
+    el.src.style.fontSize = newSize + "px";
+};
+$("decreaseSrcFontSize").onclick = () => {
+    const currentSize = parseFloat(getComputedStyle(el.src).fontSize);
+    const newSize = currentSize - 1;
+    el.src.style.fontSize = newSize + "px";
+};
+$("wrapSrcText").onclick = () => {
+    const textarea = el.src;
+    if (textarea.wrap === "off") {
+        textarea.wrap = "soft";
+        textarea.classList.replace("whitespace-pre", "whitespace-pre-wrap");
+    } else {
+        textarea.wrap = "off";
+        textarea.classList.replace("whitespace-pre-wrap", "whitespace-pre");
+    }
+};
+$("selectFont").addEventListener("input", (e) => {
+    el.src.style.fontFamily = e.target.value;
+    el.mount.querySelector("table").style.fontFamily = e.target.value;
+});
 
 // ---------- Measuring ----------
 
