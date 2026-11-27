@@ -1690,32 +1690,165 @@ function findAndReplace(textarea, replaceItem, newLine = false) {
     // textarea.focus();
 }
 
-function joinSelectedLines(textarea) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+function editColumnByTab(textarea, pattern) {
+    if (!pattern || pattern.split("❗").length !== 3) {
+        console.error("Invalid pattern format.");
+        return;
+    }
 
-    // Nothing selected → do nothing
-    if (start === end) return;
+    saveUndoState(textarea);
 
-    const value = textarea.value;
+    let [startingWrapper, endingWrapper, columnNumberToEdit] = pattern.split("❗");
+    columnNumberToEdit = parseInt(columnNumberToEdit);
 
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end);
-    const after = value.slice(end);
+    const inputText = textarea.value;
+    const targetIndex = columnNumberToEdit - 1;
+    const rows = inputText.split("\n");
 
-    // Normalize line breaks and collapse into single spaces
-    const joined = selected
-        .replace(/\r?\n+/g, " ")
+    // Process each row
+    const modifiedRows = rows.map((row) => {
+        if (!row.trim()) return row;
+
+        // FIX: Detect the delimiter for THIS specific row dynamically
+        const tabCount = (row.match(/\t/g) || []).length;
+        const pipeCount = (row.match(/\|/g) || []).length;
+        const delimiter = pipeCount > tabCount ? "|" : "\t";
+
+        // Split using the row's specific delimiter
+        const columns = row.split(delimiter);
+
+        if (columns[targetIndex] !== undefined) {
+            // Trim the specific cell value to ensure wrappers fit snugly
+            const cellValue = columns[targetIndex].trim();
+            columns[targetIndex] = `${startingWrapper}${cellValue}${endingWrapper}`;
+        }
+
+        return columns.join(delimiter);
+    });
+
+    textarea.value = modifiedRows.join("\n");
+}
+
+function joinText(text, lineEnd = null) {
+    return text
+        .trim()
+        .replace("; ", `${lineEnd === ";" ? "；" : "; "}`)
+        .replace(/\r?\n+/g, `${lineEnd ? `${lineEnd} ` : " "}`)
         .replace(/\s+/g, " ")
         .trim();
+}
 
-    textarea.value = before + joined + after;
+async function joinSelectedLines(textarea, lineEnd = null) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const value = textarea.value;
 
-    // Restore selection around modified text
-    textarea.selectionStart = start;
-    textarea.selectionEnd = start + joined.length;
+    // Save state before modification
+    saveUndoState(textarea);
 
-    textarea.focus();
+    let before = "";
+    let selected = "";
+    let after = "";
+    let joined = "";
+
+    if (start === end) {
+        // No selection → process the whole textarea
+
+        joined = joinText(value, lineEnd);
+
+        textarea.value = joined;
+
+        // Cursor at end
+        textarea.selectionStart = 0;
+        textarea.selectionEnd = joined.length;
+
+        // Copy whole processed text
+        await navigator.clipboard.writeText(joined);
+    } else {
+        // Selection → process only selected text
+        before = value.slice(0, start);
+        selected = value.slice(start, end);
+        after = value.slice(end);
+
+        joined = joinText(selected, lineEnd);
+
+        textarea.value = before + joined + after;
+
+        // Restore selection around modified text
+        textarea.selectionStart = start;
+        textarea.selectionEnd = start + joined.length;
+
+        // Copy processed selected text
+        await navigator.clipboard.writeText(joined);
+    }
+
+    // textarea.focus();
+}
+
+function formatText(text, colorIndex = 14) {
+    const colors = [
+        "#FF0000", // 0
+        "#990033", // 1
+        "#ff0066", // 2
+        "#e63804", // 3
+        "#B37400", // 4
+        "#5fb503", // 5
+        "#009c1a", // 6
+        "#0000FF", // 7
+        "#0404bb", // 8
+        "#d303d3", // 9
+        "#FF69B4", // 10
+        "#E97451", // 11
+        "#9400D3", // 12
+        "#4B0082", // 13
+        "#6600ff", // 14
+        "#e48f05", // 15
+        "#04cab6", // 16
+        "#f53928", // 17
+        "#151201", // 18
+        "#512d01", // 19
+        "#e8474a", // 20
+    ];
+
+    // Regex matches: optional color digits, optional [modifiers] separated by slashes, and *content*
+    const regex = /(\d+)?(?:\[([^\]]+)\])?\*(.*?)\*/g;
+
+    const highlightedText = text.replace(regex, (match, colorNum, modifiersString, content) => {
+        // Determine color
+        const i = colorNum ? Number(colorNum) : colorIndex;
+        const colorClass = colors[i] || colors[colorIndex];
+
+        // Default styles
+        let fontWeight = "600";
+        let fontStyle = "normal";
+        let textDecoration = "none";
+        let borderBottom = "none";
+
+        let fontWeights = ["200", "300", "400", "500", "600", "700", "800", "900"];
+
+        // Process merged modifiers if they exist
+        if (modifiersString) {
+            const modifiers = modifiersString.split("/");
+            modifiers.forEach((mod) => {
+                const cleanMod = mod.trim();
+                if (cleanMod === "b") {
+                    fontWeight = "800";
+                } else if (fontWeights.includes(cleanMod)) {
+                    fontWeight = cleanMod;
+                } else if (cleanMod === "i") {
+                    fontStyle = "italic";
+                } else if (cleanMod === "u") {
+                    textDecoration = "underline";
+                } else if (cleanMod === "bb") {
+                    borderBottom = `2px solid ${colorClass}`;
+                }
+            });
+        }
+
+        return `<span style="font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; border-bottom: ${borderBottom}; color: ${colorClass};">${content.trim()}</span>`;
+    });
+
+    return highlightedText;
 }
 
 function getFontSize(el) {

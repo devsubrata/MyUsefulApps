@@ -63,11 +63,19 @@
                         </button>
                     </div>
                     <div class="flex gap-1 text-sm">
+                        <button
+                            type="button"
+                            id="btn-join-lines"
+                            title="Join lines by an end"
+                            class="rounded-md bg-indigo-700 text-white text-sm px-3 py-1.5 hover:bg-indigo-800"
+                        >
+                            >|<
+                        </button>
                         <input
                             id="input-fnr"
                             min="1"
                             placeholder="find and replace"
-                            class="w-[100px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-0 text-xl"
+                            class="w-[150px] rounded-md border border-slate-300 bg-white focus:outline-none px-2 py-0 text-xl"
                         />
                         <button
                             type="button"
@@ -76,6 +84,19 @@
                             class="rounded-md bg-indigo-700 text-white text-sm px-3 py-1.5 hover:bg-indigo-800"
                         >
                             FnR
+                        </button>
+                        <select id="pattern" title="Add Pattern" class="rounded-md border border-slate-300 bg-white focus:outline-none px-0 py-1">
+                            <option value="*🟩*" selected>*🟩*</option>
+                            <option value="*🟩*❗2">*🟩*❗D</option>
+                            <option value="*❗*❗2">*❗*❗D</option>
+                        </select>
+                        <button
+                            type="button"
+                            id="btn-column-format"
+                            title="Modify Column Color"
+                            class="rounded-md bg-indigo-700 text-white text-sm px-3 py-1.5 hover:bg-indigo-800"
+                        >
+                            FC
                         </button>
                         <button
                             type="button"
@@ -115,6 +136,16 @@
                             Load example
                         </button>
                         <button type="button" id="btn-clear" class="text-teal-700 dark:text-teal-400 underline underline-offset-2">Clear</button>
+                        <div class="group relative inline-block">
+                            <!-- The Button -->
+                            <button class="text-teal-700 dark:text-teal-400">ColorCode</button>
+                            <!-- The Full-Size Image Container -->
+                            <div
+                                class="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50"
+                            >
+                                <img src="./ColorCode.png" alt="Full Size Popup" class="max-w-none rounded-xl shadow-2xl border border-gray-200" />
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <textarea
@@ -160,6 +191,10 @@
                         <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
                             <input type="checkbox" id="o-dash" class="size-4 accent-teal-700" />
                             <span>Dash in empty cells</span>
+                        </label>
+                        <label class="flex items-center gap-1 py-1.5 border-b border-slate-100 dark:border-slate-800">
+                            <input type="checkbox" id="o-table-border" class="size-4 accent-teal-700" checked />
+                            <span>Show table border</span>
                         </label>
                     </div>
                 </div>

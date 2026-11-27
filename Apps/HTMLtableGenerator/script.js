@@ -32,6 +32,7 @@ const el = {
     zebra: $("o-zebra"),
     first: $("o-first"),
     dash: $("o-dash"),
+    tableBorder: $("o-table-border"),
     density: $("o-density"),
     copy: $("btn-copy"),
     copyHtml: $("btn-html"),
@@ -88,6 +89,7 @@ const opts = () => ({
     zebra: el.zebra.checked,
     first: el.first.checked,
     dash: el.dash.checked,
+    tableBorder: el.tableBorder.checked,
     density: el.density.value,
     inputFnR: el.inputFnR.value,
 });
@@ -102,6 +104,47 @@ function colLetter(i) {
 
 el.btnFnR.onclick = () => findAndReplace(el.src, opts().inputFnR);
 el.btnUndo.onclick = () => undoLastAction(el.src);
+$("btn-column-format").onclick = () => editColumnByTab(el.src, opts().inputFnR);
+$("pattern").onchange = (e) => (el.inputFnR.value = e.target.value);
+$("btn-join-lines").onclick = () => joinSelectedLines(el.src, el.inputFnR.value || null);
+
+let originalTableBorder = "";
+const originalCellBorders = new Map();
+el.tableBorder.onchange = (e) => {
+    const table = $("target-table");
+    if (!table) return;
+
+    const cells = table.querySelectorAll("td");
+
+    if (!e.target.checked) {
+        // --- TURN BORDERS OFF ---
+
+        // 1. Store and remove the table's main outer border
+        originalTableBorder = table.style.border;
+        table.style.border = "none";
+
+        // 2. Loop through each cell, save its unique inline border, and remove it
+        cells.forEach((cell, index) => {
+            originalCellBorders.set(index, cell.style.border);
+            cell.style.border = "none";
+        });
+    } else {
+        // --- TURN BORDERS ON ---
+
+        // 1. Restore the table's main outer border if a value was stored
+        if (originalTableBorder) {
+            table.style.border = originalTableBorder;
+        }
+
+        // 2. Loop through each cell and put back its original exact border rule
+        cells.forEach((cell, index) => {
+            if (originalCellBorders.has(index)) {
+                cell.style.border = originalCellBorders.get(index);
+            }
+        });
+    }
+};
+
 $("increaseSrcFontSize").onclick = () => {
     const currentSize = parseFloat(getComputedStyle(el.src).fontSize);
     const newSize = currentSize + 1;
@@ -173,6 +216,7 @@ function render() {
     const [px, py, fs] = PAD[o.density];
     const table = document.createElement("table");
     table.className = `border-separate border-spacing-0 table-fixed ${fs}`;
+    table.id = "target-table";
 
     // <colgroup> carries the widths, so a drag only touches one <col>.
     const cg = document.createElement("colgroup");
@@ -244,7 +288,8 @@ function render() {
                 box.textContent = o.dash ? "—" : " ";
                 if (o.dash) box.classList.add("opacity-40");
             } else {
-                box.innerHTML = highlightCellText(text);
+                // box.innerHTML = highlightCellText(text);
+                box.innerHTML = formatText(text);
             }
             td.title = text;
             td.append(box);
@@ -292,6 +337,7 @@ function applyGridBorders(thickness, color) {
 
     qsa("th").forEach((th) => (th.style.border = newBorder));
     qsa("td").forEach((td) => (td.style.border = newBorder));
+    el.tableBorder.checked = true;
 }
 
 function resetGridBorders() {
@@ -301,6 +347,7 @@ function resetGridBorders() {
     table.style.border = borderState.table.border;
     qsa("th").forEach((th, i) => (th.style.border = borderState.th[i].border));
     qsa("td").forEach((td, i) => (td.style.border = borderState.td[i].border));
+    el.tableBorder.checked = false;
 }
 
 let gridEnabled = false;
